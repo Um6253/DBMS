@@ -1,0 +1,544 @@
+ declare
+ age number;
+ inage exception;
+ begin
+ age:=&age;
+ if ((age>0) and (age<200))then
+ dbms_output.put_line('Your Age is:'||age);
+ else
+ raise inage;
+ end if;
+ exception
+ when inage then
+ dbms_output.put_line('Invalid age error');
+ end;
+/
+
+SQL*Plus: Release 11.2.0.4.0 Production on Wed Apr 26 15:59:01 2023
+
+Copyright (c) 1982, 2013, Oracle.  All rights reserved.
+
+Enter user-name: RA2011003011183/RA2011003011183@g1-g2-h1.c0vm8jxyhl5s.us-east-2.rds.amazonaws.com:1521/orcl
+
+Connected to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+
+SQL> drop table emp;
+
+Table dropped.
+
+SQL> create table employee(eno number(3)primary key,ename varchar(15),dept
+  2  varchar(5),salary number(5));
+
+Table created.
+
+SQL> insert into employee values(&eno,'&ename','&dept',&salary);
+Enter value for eno: 101
+Enter value for ename: vignesh
+Enter value for dept: ca
+Enter value for salary: 20000
+old   1: insert into employee values(&eno,'&ename','&dept',&salary)
+new   1: insert into employee values(101,'vignesh','ca',20000)
+
+1 row created.
+
+SQL> insert into employee values(&eno,'&ename','&dept',&salary);
+Enter value for eno: 102
+Enter value for ename: keerthi
+Enter value for dept: ca
+Enter value for salary: 17000
+old   1: insert into employee values(&eno,'&ename','&dept',&salary)
+new   1: insert into employee values(102,'keerthi','ca',17000)
+
+1 row created.
+
+SQL> insert into employee values(&eno,'&ename','&dept',&salary);
+Enter value for eno: 103
+Enter value for ename: anjali
+Enter value for dept: ca
+Enter value for salary: 19000
+old   1: insert into employee values(&eno,'&ename','&dept',&salary)
+new   1: insert into employee values(103,'anjali','ca',19000)
+
+1 row created.
+
+SQL> insert into employee values(&eno,'&ename','&dept',&salary);
+Enter value for eno: 140
+Enter value for ename: shaziya
+Enter value for dept: ca
+Enter value for salary: 16000
+old   1: insert into employee values(&eno,'&ename','&dept',&salary)
+new   1: insert into employee values(140,'shaziya','ca',16000)
+
+1 row created.
+
+SQL> insert into employee values(&eno,'&ename','&dept',&salary);
+Enter value for eno: 105
+Enter value for ename: ravin
+Enter value for dept: it
+Enter value for salary: 120000
+old   1: insert into employee values(&eno,'&ename','&dept',&salary)
+new   1: insert into employee values(105,'ravin','it',120000)
+insert into employee values(105,'ravin','it',120000)
+                                             *
+ERROR at line 1:
+ORA-01438: value larger than specified precision allowed for this column
+
+
+SQL> insert into employee values(&eno,'&ename','&dept',&salary);
+Enter value for eno: 105
+Enter value for ename: ravin
+Enter value for dept: it
+Enter value for salary: 12000
+old   1: insert into employee values(&eno,'&ename','&dept',&salary)
+new   1: insert into employee values(105,'ravin','it',12000)
+
+1 row created.
+
+SQL> select * from employee'
+  2  ;
+ERROR:
+ORA-01756: quoted string not properly terminated
+
+
+SQL> select * from employee;
+
+       ENO ENAME           DEPT      SALARY
+---------- --------------- ----- ----------
+       101 vignesh         ca         20000
+       102 keerthi         ca         17000
+       103 anjali          ca         19000
+       140 shaziya         ca         16000
+       105 ravin           it         12000
+
+SQL>
+SQL> create or replace trigger salarychanges
+  2  before insert or update on employee
+  3  for each row
+  4  when (new.eno&gt;0)
+  5  declare
+  6  sal_diff number;
+  7  begin
+  8  sal_diff:=:new.salary - :old.salary;
+  9  dbms_output.put_line(‘Old Salary = ‘|| :old.salary);
+ 10  dbms_output.put_line(‘New Salary = ‘|| :new.salary);
+ 11  dbms_output.put_line(‘Salary Difference = ‘|| sal_diff);
+ 12  end;
+ 13  /
+Enter value for gt: 102
+old   4: when (new.eno&gt;0)
+new   4: when (new.eno102;0)
+when (new.eno102;0)
+                *
+ERROR at line 4:
+ORA-00920: invalid relational operator
+
+
+SQL> set serveroutput on;
+SQL> create or replace trigger salarychanges
+  2  before insert or update on employee
+  3  for each row
+  4  when (new.eno&gt;0)
+  5  declare
+  6  sal_diff number;
+  7  begin
+  8  sal_diff:=:new.salary - :old.salary;
+  9  dbms_output.put_line(‘Old Salary = ‘|| :old.salary);
+ 10  dbms_output.put_line(‘New Salary = ‘|| :new.salary);
+ 11  dbms_output.put_line(‘Salary Difference = ‘|| sal_diff);
+ 12  end;
+ 13  /
+Enter value for gt: 2
+old   4: when (new.eno&gt;0)
+new   4: when (new.eno2;0)
+when (new.eno2;0)
+              *
+ERROR at line 4:
+ORA-00920: invalid relational operator
+
+
+SQL> set serveroutput on;
+SQL> create or replace trigger salarychanges
+  2  before insert or update on employee
+  3  for each row
+  4  when (new.eno>0)
+  5  declare
+  6  sal_diff number;
+  7  begin
+  8  sal_diff:=:new.salary - :old.salary;
+  9  dbms_output.put_line(‘Old Salary = ‘|| :old.salary);
+ 10  dbms_output.put_line(‘New Salary = ‘|| :new.salary);
+ 11  dbms_output.put_line(‘Salary Difference = ‘|| sal_diff);
+ 12  end;
+ 13  /
+
+Warning: Trigger created with compilation errors.
+
+SQL> insert into employee(eno,ename,dept,salary) values (6,’giri’,’cs’,5000);
+insert into employee(eno,ename,dept,salary) values (6,'giri','cs',5000)
+            *
+ERROR at line 1:
+ORA-04098: trigger 'RA2011003011183.SALARYCHANGES' is invalid and failed
+re-validation
+
+
+SQL> set serveroutput on;
+SQL> declare
+  2  a number;
+  3  b number;
+  4  c number;
+  5  begin
+  6  a:=&amp;a;
+  7  b:=&amp;b;
+  8  if(b>0)then
+  9  c:=a/b;
+ 10  dbms_output.put_line(C is'||c);
+ 11  else
+ 12  c:=a/b;
+ 13  end if;
+ 14
+ 15  exception
+ 16  when zero_divide then
+ 17  dbms_output.put_line('Divide by zero error');
+ 18  end;
+ 19  /
+Enter value for amp: 121
+old   6: a:=&amp;a;
+new   6: a:=121;a;
+Enter value for amp: 1021
+old   7: b:=&amp;b;
+new   7: b:=1021;b;
+ERROR:
+ORA-01756: quoted string not properly terminated
+
+
+SQL> declare
+  2  a number;
+  3  b number;
+  4  c number;
+  5  begin
+  6  a:=a;
+  7  b:=b;
+  8  if(b>0)then
+  9  c:=a/b;
+ 10  dbms_output.put_line(C is'||c);
+ 11  else
+ 12  c:=a/b;
+ 13  end if;
+ 14
+ 15  exception
+ 16  when zero_divide then
+ 17  dbms_output.put_line('Divide by zero error');
+ 18  end;
+ 19  /
+ERROR:
+ORA-01756: quoted string not properly terminated
+
+
+SQL> declare
+  2  a number;
+  3  b number;
+  4  c number;
+  5  begin
+  6  a:=&a;
+  7  b:=&b;
+  8  if(b>0)then
+  9  c:=a/b;
+ 10  dbms_output.put_line(C is'||c);
+ 11  else
+ 12  c:=a/b;
+ 13  end if;
+ 14
+ 15  exception
+ 16  when zero_divide then
+ 17  dbms_output.put_line('Divide by zero error');
+ 18  end;
+ 19  /
+Enter value for a: 8
+old   6: a:=&a;
+new   6: a:=8;
+Enter value for b: 4
+old   7: b:=&b;
+new   7: b:=4;
+ERROR:
+ORA-01756: quoted string not properly terminated
+
+
+SQL> declare
+  2  a number;
+  3  b number;
+  4  c number;
+  5  begin
+  6  a:=&a;
+  7  b:=&b;
+  8  if(b>0)then
+  9  c:=a/b;
+ 10  dbms_output.put_line('C is'||c);
+ 11  else
+ 12  c:=a/b;
+ 13  end if;
+ 14
+ 15  exception
+ 16  when zero_divide then
+ 17  dbms_output.put_line('Divide by zero error');
+ 18  end;
+ 19  /
+Enter value for a: 8
+old   6: a:=&a;
+new   6: a:=8;
+Enter value for b: 4
+old   7: b:=&b;
+new   7: b:=4;
+C is2
+
+PL/SQL procedure successfully completed.
+
+SQL>  declare
+  2   age number;
+  3   inage exception;
+  4   begin
+  5   age:=&age;
+  6   if ((age>=0) and (age<200))then
+  7   dbms_output.put_line('Your Age is:'||age);
+  8   else
+  9   raise inage;
+ 10   end if;
+ 11   exception
+ 12   when inage then
+ 13   dbms_output.put_line('Invalid age error');
+ 14   end
+ 15  /
+Enter value for age: 20
+old   5:  age:=&age;
+new   5:  age:=20;
+ end
+   *
+ERROR at line 14:
+ORA-06550: line 14, column 4:
+PLS-00103: Encountered the symbol "end-of-file" when expecting one of the
+following:
+; <an identifier> <a double-quoted delimited-identifier>
+The symbol ";" was substituted for "end-of-file" to continue.
+
+
+SQL>  declare
+  2   age number;
+  3   inage exception;
+  4   begin
+  5   age:=&age;
+  6   if ((age>=0) and (age<200))then
+  7   dbms_output.put_line('Your Age is:'||age);
+  8   else
+  9   raise inage;
+ 10   end if;
+ 11   exception
+ 12   when inage then
+ 13   dbms_output.put_line('Invalid age error');
+ 14   end;
+ 15  /
+Enter value for age: 20
+old   5:  age:=&age;
+new   5:  age:=20;
+Your Age is:20
+
+PL/SQL procedure successfully completed.
+
+SQL> /
+Enter value for age: 0
+old   5:  age:=&age;
+new   5:  age:=0;
+Your Age is:0
+
+PL/SQL procedure successfully completed.
+
+SQL>  declare
+  2   age number;
+  3   inage exception;
+  4   begin
+  5   age:=&age;
+  6   if ((age>0) and (age<200))then
+  7   dbms_output.put_line('Your Age is:'||age);
+  8   else
+  9   raise inage;
+ 10   end if;
+ 11   exception
+ 12   when inage then
+ 13   dbms_output.put_line('Invalid age error');
+ 14   end;
+ 15  /
+Enter value for age: 20
+old   5:  age:=&age;
+new   5:  age:=20;
+Your Age is:20
+
+PL/SQL procedure successfully completed.
+
+SQL> /
+Enter value for age: 0
+old   5:  age:=&age;
+new   5:  age:=0;
+Invalid age error
+
+PL/SQL procedure successfully completed.
+
+SQL> create or replace trigger salarychanges
+  2      before insert or update on employee
+  3      for each row
+  4      when (new.eno > 0)
+  5    declare
+  6      sal_diff number;
+  7   begin
+  8     sal_diff := :new.salary - :old.salary;
+  9     dbms_output.put_line('Old Salary = ' || :old.salary);
+ 10    dbms_output.put_line('New Salary = ' || :new.salary);
+ 11      dbms_output.put_line('Salary Difference = ' || sal_diff);
+ 12   end;
+ 13     /
+
+Trigger created.
+
+SQL> insert into employee(eno,ename,dept,salary) values (6,’giri’,’cs’,5000);
+Old Salary =
+New Salary = 5000
+Salary Difference =
+
+1 row created.
+
+SQL> update employee set salary=salary+500 where eno=102;
+Old Salary = 17000
+New Salary = 17500
+Salary Difference = 500
+
+1 row updated.
+
+SQL>
+SQL*Plus: Release 11.2.0.4.0 Production on Wed Apr 26 16:37:53 2023
+
+Copyright (c) 1982, 2013, Oracle.  All rights reserved.
+
+Enter user-name: RA2011003011183/RA2011003011183@g1-g2-h1.c0vm8jxyhl5s.us-east-2.rds.amazonaws.com:1521/orcl
+
+Connected to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+
+SQL> CREATE TABLE emp (
+  2    empno NUMBER(4) PRIMARY KEY,
+  3    ename VARCHAR2(30),
+  4    job VARCHAR2(30),
+  5    mgr NUMBER(4),
+  6    hiredate DATE,
+  7    sal NUMBER(7,2),
+  8    comm NUMBER(7,2),
+  9    deptno NUMBER(2)
+ 10  );
+
+Table created.
+
+SQL> INSERT INTO emp VALUES (7369, 'SMITH', 'CLERK', 7902, TO_DATE('17-12-1980', 'DD-MM-YYYY'), 800, NULL, 20);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7499, 'ALLEN', 'SALESMAN', 7698, TO_DATE('20-02-1981', 'DD-MM-YYYY'), 1600, 300, 30);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7521, 'WARD', 'SALESMAN', 7698, TO_DATE('22-02-1981', 'DD-MM-YYYY'), 1250, 500, 30);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7566, 'JONES', 'MANAGER', 7839, TO_DATE('02-04-1981', 'DD-MM-YYYY'), 2975, NULL, 20);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7654, 'MARTIN', 'SALESMAN', 7698, TO_DATE('28-09-1981', 'DD-MM-YYYY'), 1250, 1400, 30);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7698, 'BLAKE', 'MANAGER', 7839, TO_DATE('01-05-1981', 'DD-MM-YYYY'), 2850, NULL, 30);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7782, 'CLARK', 'MANAGER', 7839, TO_DATE('09-06-1981', 'DD-MM-YYYY'), 2450, NULL, 10);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7788, 'SCOTT', 'ANALYST', 7566, TO_DATE('19-04-1987', 'DD-MM-YYYY'), 3000, NULL, 20);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7839, 'KING', 'PRESIDENT', NULL, TO_DATE('17-11-1981', 'DD-MM-YYYY'), 5000, NULL, 10);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7844, 'TURNER', 'SALESMAN', 7698, TO_DATE('08-09-1981', 'DD-MM-YYYY'), 1500, 0, 30);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7876, 'ADAMS', 'CLERK', 7788, TO_DATE('23-05-1987', 'DD-MM-YYYY'), 1100, NULL, 20);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7900, 'JAMES', 'CLERK', 7698, TO_DATE('03-12-1981', 'DD-MM-YYYY'), 950, NULL, 30);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7902, 'FORD', 'ANALYST', 7566, TO_DATE('03-12-1981', 'DD-MM-YYYY'), 3000, NULL, 20);
+
+1 row created.
+
+SQL> INSERT INTO emp VALUES (7934, 'MILLER', 'CLERK', 7782, TO_DATE('23-01-1982', 'DD-MM-YYYY'), 1300, NULL, 10);
+
+1 row created.
+
+SQL> set sereveroutput on;
+SP2-0735: unknown SET option beginning "sereverout..."
+SQL> set serveroutput on;
+SQL> DECLARE
+  2     num NUMBER(5);
+  3  BEGIN
+  4      UPDATE emp SET sal = sal + sal * 0.15 WHERE deptno = 20;
+  5
+  6      IF SQL%NOTFOUND THEN
+  7       DBMS_OUTPUT.PUT_LINE('None of the salaries were updated.');
+  8      ELSIF SQL%FOUND THEN
+  9         num := SQL%ROWCOUNT;
+ 10        DBMS_OUTPUT.PUT_LINE('Salaries for ' || num || ' employees are updated.');
+ 11      END IF;
+ 12    END;
+ 13    /
+Salaries for 5 employees are updated.
+
+PL/SQL procedure successfully completed.
+
+SQL> -- Create emp_grade table
+SQL> CREATE TABLE emp_grade (
+  2    empno NUMBER,
+  3    grade VARCHAR2(10)
+  4  );
+
+Table created.
+
+SQL>
+SQL> -- PL/SQL block to insert values into emp_grade
+SQL> DECLARE
+  2    emp_record emp%ROWTYPE;
+  3  BEGIN
+  4    -- Loop through each employee in the emp table
+  5    FOR emp_record IN (SELECT * FROM emp)
+  6    LOOP
+  7      -- Determine the grade based on the employee's salary
+  8      IF emp_record.sal >= 10000 THEN
+  9        INSERT INTO emp_grade VALUES (emp_record.empno, 'A');
+ 10      ELSIF emp_record.sal >= 8000 THEN
+ 11        INSERT INTO emp_grade VALUES (emp_record.empno, 'B');
+ 12      ELSE
+ 13        INSERT INTO emp_grade VALUES (emp_record.empno, 'C');
+ 14      END IF;
+ 15    END LOOP;
+ 16  END;
+ 17  /
+
+PL/SQL procedure successfully completed.
+
+SQL>
+SQL>
